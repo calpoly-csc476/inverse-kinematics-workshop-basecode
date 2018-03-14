@@ -125,6 +125,6 @@ void InverseKinematicsSolver::ConvertPositionsToEulerAngles()
 			Joints[t]->Rotation = euler;
 		}
 
-		CurrentTransform = CurrentTransform * Joints[t]->GetLocalTransform();
+		CurrentTransform = CurrentTransform * Joints[t]->GetLocalRotation();
 	}
 }

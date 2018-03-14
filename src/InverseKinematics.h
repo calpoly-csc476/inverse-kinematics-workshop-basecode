@@ -20,7 +20,7 @@ public:
 
 		glm::vec3 InboardLocation, OutboardLocation;
 
-		glm::mat4 GetLocalTransform() const
+		glm::mat4 GetLocalRotation() const
 		{
 			glm::mat4 Rot = glm::mat4(1.f);
 			Rot = glm::rotate(Rot, Rotation.x, glm::vec3(1, 0, 0));
@@ -34,11 +34,11 @@ public:
 		{
 			if (Parent)
 			{
-				return Parent->GetOutboardTransformation() * GetLocalTransform();
+				return Parent->GetOutboardTransformation() * GetLocalRotation();
 			}
 			else
 			{
-				return GetLocalTransform();
+				return GetLocalRotation();
 			}
 		}
 
