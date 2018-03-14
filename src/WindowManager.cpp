@@ -47,7 +47,7 @@ bool WindowManager::init(int const width, int const height)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
 	// Create a windowed mode window and its OpenGL context.
-	windowHandle = glfwCreateWindow(width, height, "View Frustum Culling", nullptr, nullptr);
+	windowHandle = glfwCreateWindow(width, height, "Inverse Kinematics", nullptr, nullptr);
 	if (! windowHandle)
 	{
 		glfwTerminate();
