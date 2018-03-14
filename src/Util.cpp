@@ -70,10 +70,10 @@ glm::vec3 HSV(float const H, float const S, float const V)
 
 float frand()
 {
-	return std::rand() / (float) RAND_MAX;
+	return rand() / (float) RAND_MAX;
 }
 
 float nrand()
 {
-	return (std::rand() / (float) RAND_MAX) * 2.f - 1.f;
+	return (rand() / (float) RAND_MAX) * 2.f - 1.f;
 }
