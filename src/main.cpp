@@ -209,7 +209,12 @@ public:
 			switch (key)
 			{
 			case GLFW_KEY_SPACE:
+				Solver.StepFABRIK(ik_goal);
+				break;
+
+			case GLFW_KEY_ENTER:
 				Solver.RunIK(ik_goal);
+				break;
 			}
 		}
 	}
@@ -231,7 +236,7 @@ public:
 
 	void UpdateGoalPosition()
 	{
-		Solver.RunIK(ik_goal);
+		//Solver.RunIK(ik_goal);
 	}
 
 
@@ -472,6 +477,14 @@ public:
 			SetModel(Solver.Joints[i]->InboardLocation, 0, 0.04f, BlinnPhongProg);
 			sphere->draw(BlinnPhongProg);
 
+			for (int t = 0; t < 5; ++ t)
+			{
+				SetModel(
+					glm::mix(Solver.Joints[i]->InboardLocation, Solver.Joints[i]->OutboardLocation, vec3((float) (t + 1) / 6.f)),
+					0, 0.02f, BlinnPhongProg);
+				sphere->draw(BlinnPhongProg);
+			}
+
 			SetModel(Solver.Joints[i]->OutboardLocation, 0, 0.08f, BlinnPhongProg);
 			plus->draw(BlinnPhongProg);
 
@@ -480,7 +493,7 @@ public:
 				glm::translate(glm::mat4(1.f), vec3(Solver.Joints[i]->Length / 2.f, 0, 0)) * 
 				glm::scale(glm::mat4(1.f), glm::vec3(Solver.Joints[i]->Length / 2.f, 0.03f, 0.03f)),
 				BlinnPhongProg);
-			cube->draw(BlinnPhongProg);
+			//cube->draw(BlinnPhongProg);
 		}
 
 		BlinnPhongProg->unbind();
