@@ -59,6 +59,7 @@ public:
 	shared_ptr<Shape> sphere;
 	shared_ptr<Shape> cube;
 	shared_ptr<Shape> plus;
+	shared_ptr<Shape> cylinder;
 
 	int g_width = -1;
 	int g_height = -1;
@@ -94,7 +95,7 @@ public:
 	bool moveLeft = false;
 	bool moveRight = false;
 	vec3 cameraPos = vec3(0, 4, -2);
-	float cameraMoveSpeed = 12.0f;
+	float cameraMoveSpeed = 3.0f;
 
 
 	/////////////////////
@@ -329,6 +330,11 @@ public:
 		plus->resize();
 		plus->init();
 
+		cylinder = make_shared<Shape>();
+		cylinder->loadMesh(RESOURCE_DIR + "cylinder.obj");
+		cylinder->resize();
+		cylinder->init();
+
 		// Initialize the GLSL programs
 
 		BlinnPhongProg = make_shared<Program>();
@@ -446,7 +452,7 @@ public:
 		sphere->draw(BlinnPhongProg);
 
 		// origin
-		SetModel(vec3(0, 0, 0), 0, 0.125f, BlinnPhongProg);
+		SetModel(vec3(0, 0, 0), glm::radians(45.f), 0.125f, BlinnPhongProg);
 		CHECKED_GL_CALL(glUniform3f(BlinnPhongProg->getUniform("uColor"), 0.8f, 0.8f, 0.2f));
 		plus->draw(BlinnPhongProg);
 
@@ -454,7 +460,7 @@ public:
 		// ik goal
 		SetModel(ik_goal, 0, 0.08f, BlinnPhongProg);
 		CHECKED_GL_CALL(glUniform3f(BlinnPhongProg->getUniform("uColor"), 0.8f, 0.2f, 0.8f));
-		sphere->draw(BlinnPhongProg);
+		cylinder->draw(BlinnPhongProg);
 
 
 		// draw joints
