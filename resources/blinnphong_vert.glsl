@@ -21,5 +21,5 @@ void main()
 	gl_Position = P * V * Position;
 
 	// compute the normal in world space
-	fNormal = vec3(V * M * vec4(normalize(vertNor), 0.0));
+	fNormal = vec3(M * vec4(normalize(vertNor), 0.0));
 }

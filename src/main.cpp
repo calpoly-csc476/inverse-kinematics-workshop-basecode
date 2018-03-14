@@ -56,7 +56,7 @@ public:
 	GLuint GroundVertexArray;
 	int GroundIndexCount;
 
-	vec3 g_light = vec3(2, 6, -2);
+	vec3 g_light = vec3(2, 6, 4);
 
 	/////////////////
 	// Camera Data //
