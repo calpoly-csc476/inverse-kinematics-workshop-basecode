@@ -72,18 +72,30 @@ void InverseKinematicsSolver::FABRIKStepOne(glm::vec3 const & GoalPosition)
 {
 	vec3 CurrentGoal = GoalPosition;
 
-	Joints[2]->OutboardLocation = CurrentGoal;
+	for (int t = (int) Joints.size() - 1; t >= 0; -- t)
+	{
+		Joints[t]->OutboardLocation = CurrentGoal;
 
-	const vec3 CurrentLine = normalize(Joints[2]->OutboardLocation - Joints[2]->InboardLocation);
-	Joints[2]->InboardLocation = Joints[2]->OutboardLocation - CurrentLine * Joints[2]->Length;
+		const vec3 CurrentLine = normalize(Joints[t]->OutboardLocation - Joints[t]->InboardLocation);
+		Joints[t]->InboardLocation = Joints[t]->OutboardLocation - CurrentLine * Joints[t]->Length;
+
+		CurrentGoal = Joints[t]->InboardLocation;
+	}
 }
 
 void InverseKinematicsSolver::FABRIKStepTwo(glm::vec3 const & GoalPosition)
 {
-	Joints[2]->InboardLocation = Joints[1]->OutboardLocation;
+	vec3 CurrentGoal = GoalPosition;
 
-	const vec3 CurrentLine = normalize(Joints[2]->InboardLocation - Joints[2]->OutboardLocation);
-	Joints[2]->OutboardLocation = Joints[2]->InboardLocation - CurrentLine * Joints[2]->Length;
+	for (int t = 0; t < Joints.size(); ++ t)
+	{
+		Joints[t]->InboardLocation = CurrentGoal;
+
+		const vec3 CurrentLine = normalize(Joints[t]->InboardLocation - Joints[t]->OutboardLocation);
+		Joints[t]->OutboardLocation = Joints[t]->InboardLocation - CurrentLine * Joints[t]->Length;
+
+		CurrentGoal = Joints[t]->OutboardLocation;
+	}
 }
 
 void InverseKinematicsSolver::ConvertPositionsToEulerAngles()
