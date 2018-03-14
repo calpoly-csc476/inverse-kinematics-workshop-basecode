@@ -469,8 +469,11 @@ public:
 			vec3 color = HSV((float) i / (float) Solver.Joints.size(), 0.8f, 0.9f);
 			CHECKED_GL_CALL(glUniform3f(BlinnPhongProg->getUniform("uColor"), color.x, color.y, color.z));
 
-			SetModel(Solver.Joints[i]->GetInboardLocation(), 0, 0.04f, BlinnPhongProg);
+			SetModel(Solver.Joints[i]->InboardLocation, 0, 0.04f, BlinnPhongProg);
 			sphere->draw(BlinnPhongProg);
+
+			SetModel(Solver.Joints[i]->OutboardLocation, 0, 0.08f, BlinnPhongProg);
+			plus->draw(BlinnPhongProg);
 
 			SetModel(
 				Solver.Joints[i]->GetInboardTransformation() * 
