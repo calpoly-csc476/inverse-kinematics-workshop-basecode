@@ -72,6 +72,7 @@
     <ClCompile Include="..\ext\glad\src\glad.c" />
     <ClCompile Include="..\ext\tiny_obj_loader\tiny_obj_loader.cpp" />
     <ClCompile Include="GLSL.cpp" />
+    <ClCompile Include="InverseKinematics.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MatrixStack.cpp" />
     <ClCompile Include="Program.cpp" />
@@ -84,6 +85,7 @@
     <ClInclude Include="..\ext\stb\stb_image.h" />
     <ClInclude Include="..\ext\tiny_obj_loader\tiny_obj_loader.h" />
     <ClInclude Include="GLSL.h" />
+    <ClInclude Include="InverseKinematics.h" />
     <ClInclude Include="MatrixStack.h" />
     <ClInclude Include="Program.h" />
     <ClInclude Include="Shape.h" />

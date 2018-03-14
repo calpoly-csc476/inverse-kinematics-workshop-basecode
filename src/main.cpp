@@ -1,30 +1,39 @@
-/* Base code for shadow mapping lab */
+/* Base code for inverse kinematics lab */
 /* This code is incomplete - follow tasks listed in handout */
 
+// C standard library
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
+
+// C++ standard library
 #include <iostream>
 #include <memory>
 #include <random>
 #include <cassert>
 #include <cmath>
-#include <stdio.h>
-#include <time.h>
 
+// External dependencies
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <tiny_obj_loader/tiny_obj_loader.h>
 
+// GLM math
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+// Engine
 #include "GLSL.h"
 #include "Program.h"
 #include "Shape.h"
 #include "Texture.h"
 #include "WindowManager.h"
 #include "Util.h"
+
+
+// Workshop
+#include "InverseKinematics.h"
 
 
 using namespace std;
@@ -59,6 +68,9 @@ public:
 
 	vec3 g_light = vec3(2, 6, 4);
 
+	InverseKinematicsSolver Solver;
+	vec3 ik_goal = vec3(1, 0, 1);
+
 	/////////////////
 	// Camera Data //
 	/////////////////
@@ -68,8 +80,8 @@ public:
 
 	vec3 cameraLookAt;
 
-	float cTheta = - 3.14159f / 2.f;
-	float cPhi = 0;
+	float cTheta = 3.14159f / 2.f;
+	float cPhi = -1.2f;
 	bool mouseDown = false;
 
 	double lastX = 0;
@@ -80,7 +92,7 @@ public:
 	bool moveBack = false;
 	bool moveLeft = false;
 	bool moveRight = false;
-	vec3 cameraPos = vec3(0, 1.5f, 8);
+	vec3 cameraPos = vec3(0, 4, -2);
 	float cameraMoveSpeed = 12.0f;
 
 
@@ -133,10 +145,13 @@ public:
 			break;
 		};
 
+		static const float OffsetSpeed = 0.06f;
+
 		if (action == GLFW_PRESS)
 		{
 			switch (key)
 			{
+				// Camera speed modifiers
 			case GLFW_KEY_1:
 				cameraMoveSpeed = 1.f;
 				break;
@@ -152,6 +167,40 @@ public:
 			case GLFW_KEY_5:
 				cameraMoveSpeed = 24.f;
 				break;
+
+				// Move end effector goal
+			case GLFW_KEY_I:
+				ik_goal.z += OffsetSpeed;
+				UpdateGoalPosition();
+				break;
+			case GLFW_KEY_J:
+				ik_goal.x += OffsetSpeed;
+				UpdateGoalPosition();
+				break;
+			case GLFW_KEY_K:
+				ik_goal.z -= OffsetSpeed;
+				UpdateGoalPosition();
+				break;
+			case GLFW_KEY_L:
+				ik_goal.x -= OffsetSpeed;
+				UpdateGoalPosition();
+				break;
+			case GLFW_KEY_U:
+				ik_goal.y += OffsetSpeed;
+				UpdateGoalPosition();
+				break;
+			case GLFW_KEY_O:
+				ik_goal.y -= OffsetSpeed;
+				UpdateGoalPosition();
+				break;
+			}
+		}
+		if (action == GLFW_RELEASE)
+		{
+			switch (key)
+			{
+			case GLFW_KEY_SPACE:
+				Solver.RunIK(ik_goal);
 			}
 		}
 	}
@@ -163,6 +212,17 @@ public:
 	void resizeCallback(GLFWwindow* window, int w, int h)
 	{
 		CHECKED_GL_CALL(glViewport(0, 0, g_width = w, g_height = h));
+	}
+
+
+
+	////////////////////////
+	// Inverse Kinematics //
+	////////////////////////
+
+	void UpdateGoalPosition()
+	{
+		Solver.RunIK(ik_goal);
 	}
 
 
@@ -288,6 +348,16 @@ public:
 		ColorProg->addUniform("M");
 		ColorProg->addUniform("uColor");
 		ColorProg->addAttribute("vertPos");
+
+
+		// IK Setup
+
+		Solver.Joints.push_back(new InverseKinematicsSolver::SJoint());
+		Solver.Joints.push_back(new InverseKinematicsSolver::SJoint());
+		Solver.Joints.push_back(new InverseKinematicsSolver::SJoint());
+
+		Solver.Joints[2]->Parent = Solver.Joints[1];
+		Solver.Joints[1]->Parent = Solver.Joints[0];
 	}
 
 
@@ -321,13 +391,18 @@ public:
 		return Cam;
 	}
 
-	void SetModel(vec3 trans, float rotY, float sc, shared_ptr<Program> curS)
+	void SetModel(vec3 const & trans, float rotY, float sc, shared_ptr<Program> curS)
 	{
 		mat4 Trans = glm::translate(glm::mat4(1.0f), trans);
 		mat4 Rot = glm::rotate(glm::mat4(1.0f), rotY, vec3(0, 1, 0));
 		mat4 Scale = glm::scale(glm::mat4(1.0f), vec3(sc));
 		mat4 ctm = Trans * Rot * Scale;
 		CHECKED_GL_CALL(glUniformMatrix4fv(curS->getUniform("M"), 1, GL_FALSE, value_ptr(ctm)));
+	}
+
+	void SetModel(glm::mat4 const & transform, shared_ptr<Program> curS)
+	{
+		CHECKED_GL_CALL(glUniformMatrix4fv(curS->getUniform("M"), 1, GL_FALSE, value_ptr(transform)));
 	}
 
 
@@ -348,14 +423,37 @@ public:
 		CHECKED_GL_CALL(glUniform3f(BlinnPhongProg->getUniform("uLightPos"), g_light.x, g_light.y, g_light.z));
 
 		// draw the cube mesh
-		SetModel(vec3(-3, 0, -6), 0, 1, BlinnPhongProg);
+		SetModel(vec3(-3, 0, 6), 0, 1, BlinnPhongProg);
 		CHECKED_GL_CALL(glUniform3f(BlinnPhongProg->getUniform("uColor"), 0.8f, 0.2f, 0.2f));
 		cube->draw(BlinnPhongProg);
 
 		// draw the sphere mesh
-		SetModel(vec3(3, 0, -6), 0, 1, BlinnPhongProg);
+		SetModel(vec3(3, 0, 6), 0, 1, BlinnPhongProg);
 		CHECKED_GL_CALL(glUniform3f(BlinnPhongProg->getUniform("uColor"), 0.2f, 0.2f, 0.8f));
 		sphere->draw(BlinnPhongProg);
+
+		// ik goal
+		SetModel(ik_goal, 0, 0.08f, BlinnPhongProg);
+		CHECKED_GL_CALL(glUniform3f(BlinnPhongProg->getUniform("uColor"), 0.8f, 0.2f, 0.8f));
+		sphere->draw(BlinnPhongProg);
+
+
+		// draw joints
+		for (int i = 0; i < Solver.Joints.size(); ++ i)
+		{
+			vec3 color = HSV((float) i / (float) Solver.Joints.size(), 0.8f, 0.9f);
+			CHECKED_GL_CALL(glUniform3f(BlinnPhongProg->getUniform("uColor"), color.x, color.y, color.z));
+
+			SetModel(Solver.Joints[i]->GetInboardLocation(), 0, 0.04f, BlinnPhongProg);
+			sphere->draw(BlinnPhongProg);
+
+			SetModel(
+				Solver.Joints[i]->GetInboardTransformation() * 
+				glm::translate(glm::mat4(1.f), vec3(Solver.Joints[i]->Length / 2.f, 0, 0)) * 
+				glm::scale(glm::mat4(1.f), glm::vec3(Solver.Joints[i]->Length / 2.f, 0.03f, 0.03f)),
+				BlinnPhongProg);
+			cube->draw(BlinnPhongProg);
+		}
 
 		BlinnPhongProg->unbind();
 
@@ -393,7 +491,6 @@ public:
 		cameraLookAt = cameraPos + forward;
 	}
 	
-	/* let's draw */
 	void render()
 	{
 		float t1 = (float) glfwGetTime();

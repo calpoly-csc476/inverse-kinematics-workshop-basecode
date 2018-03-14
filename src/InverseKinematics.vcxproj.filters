@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="..\ext\glad\src\glad.c">
+      <Filter>ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ext\tiny_obj_loader\tiny_obj_loader.cpp">
+      <Filter>ext</Filter>
+    </ClCompile>
+    <ClCompile Include="GLSL.cpp">
+      <Filter>Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="MatrixStack.cpp">
+      <Filter>Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Program.cpp">
+      <Filter>Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Shape.cpp">
+      <Filter>Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowManager.cpp">
+      <Filter>Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Util.cpp">
+      <Filter>Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="InverseKinematics.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\ext\tiny_obj_loader\tiny_obj_loader.h">
+      <Filter>ext</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ext\stb\stb_image.h">
+      <Filter>ext</Filter>
+    </ClInclude>
+    <ClInclude Include="GLSL.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="MatrixStack.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Program.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Shape.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowManager.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Util.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="InverseKinematics.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="ext">
+      <UniqueIdentifier>{afb69a76-21d7-4919-980a-01248debcd40}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine">
+      <UniqueIdentifier>{d30f73f2-1442-4309-b69c-bf9e0825bad0}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
