@@ -72,5 +72,9 @@ public:
 	void RunIK(glm::vec3 const & GoalPosition);
 
 	void StepFABRIK(glm::vec3 const & GoalPosition);
+	void FABRIKStepOne(glm::vec3 const & GoalPosition);
+	void FABRIKStepTwo(glm::vec3 const & GoalPosition);
+
+	void ConvertPositionsToEulerAngles();
 
 };

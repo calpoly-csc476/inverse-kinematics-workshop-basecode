@@ -53,6 +53,17 @@ void InverseKinematicsSolver::StepFABRIK(glm::vec3 const & GoalPosition)
 	vec3 RootPosition = Joints[0]->GetInboardLocation();
 
 	// First pass - front to back
+	FABRIKStepOne(GoalPosition);
+
+	// Second pass - back to front
+	FABRIKStepTwo(RootPosition);
+
+	// Figure out Euler rotations for this configuration (e.g. for drawing/rigging)
+	ConvertPositionsToEulerAngles();
+}
+
+void InverseKinematicsSolver::FABRIKStepOne(glm::vec3 const & GoalPosition)
+{
 	vec3 CurrentGoal = GoalPosition;
 
 	for (int t = (int) Joints.size() - 1; t >= 0; -- t)
@@ -67,8 +78,11 @@ void InverseKinematicsSolver::StepFABRIK(glm::vec3 const & GoalPosition)
 		CurrentGoal = Joints[t]->InboardLocation;
 	}
 
-	// Second pass - back to front
-	CurrentGoal = RootPosition;
+}
+
+void InverseKinematicsSolver::FABRIKStepTwo(glm::vec3 const & GoalPosition)
+{
+	vec3 CurrentGoal = GoalPosition;
 
 	for (int t = 0; t < Joints.size(); ++ t)
 	{
@@ -78,7 +92,10 @@ void InverseKinematicsSolver::StepFABRIK(glm::vec3 const & GoalPosition)
 		Joints[t]->OutboardLocation = Joints[t]->InboardLocation - CurrentLine * Joints[t]->Length;
 		CurrentGoal = Joints[t]->OutboardLocation;
 	}
+}
 
+void InverseKinematicsSolver::ConvertPositionsToEulerAngles()
+{
 	// Convert inboard/outboard to direction vectors
 	mat4 CurrentTransform = mat4(1.f);
 

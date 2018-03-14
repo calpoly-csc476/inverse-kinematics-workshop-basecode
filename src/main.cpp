@@ -58,6 +58,7 @@ public:
 	// Shapes
 	shared_ptr<Shape> sphere;
 	shared_ptr<Shape> cube;
+	shared_ptr<Shape> plus;
 
 	int g_width = -1;
 	int g_height = -1;
@@ -323,6 +324,11 @@ public:
 		sphere->resize();
 		sphere->init();
 
+		plus = make_shared<Shape>();
+		plus->loadMesh(RESOURCE_DIR + "plus.obj");
+		plus->resize();
+		plus->init();
+
 		// Initialize the GLSL programs
 
 		BlinnPhongProg = make_shared<Program>();
@@ -438,6 +444,12 @@ public:
 		SetModel(vec3(3, 0, 6), 0, 1, BlinnPhongProg);
 		CHECKED_GL_CALL(glUniform3f(BlinnPhongProg->getUniform("uColor"), 0.2f, 0.2f, 0.8f));
 		sphere->draw(BlinnPhongProg);
+
+		// origin
+		SetModel(vec3(0, 0, 0), 0, 0.125f, BlinnPhongProg);
+		CHECKED_GL_CALL(glUniform3f(BlinnPhongProg->getUniform("uColor"), 0.8f, 0.8f, 0.2f));
+		plus->draw(BlinnPhongProg);
+
 
 		// ik goal
 		SetModel(ik_goal, 0, 0.08f, BlinnPhongProg);
