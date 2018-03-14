@@ -80,12 +80,10 @@ void InverseKinematicsSolver::FABRIKStepOne(glm::vec3 const & GoalPosition)
 
 void InverseKinematicsSolver::FABRIKStepTwo(glm::vec3 const & GoalPosition)
 {
-	//  _____    ___      ____     ___  
-	// |_   _|  / _ \    |  _ \   / _ \ 
-	//   | |   | | | |   | | | | | | | |
-	//   | |   | |_| |   | |_| | | |_| |
-	//   |_|    \___/    |____/   \___/ 
-	//
+	Joints[2]->InboardLocation = Joints[1]->OutboardLocation;
+
+	const vec3 CurrentLine = normalize(Joints[2]->InboardLocation - Joints[2]->OutboardLocation);
+	Joints[2]->OutboardLocation = Joints[2]->InboardLocation - CurrentLine * Joints[2]->Length;
 }
 
 void InverseKinematicsSolver::ConvertPositionsToEulerAngles()
