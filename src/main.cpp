@@ -43,6 +43,7 @@ public:
 	WindowManager * windowManager = nullptr;
 
 	// Shaders
+	shared_ptr<Program> ColorProg;
 	shared_ptr<Program> BlinnPhongProg;
 
 	// Shapes
@@ -174,51 +175,54 @@ public:
 	void initGeom()
 	{
 		// Create the ground plane
-		const float groundSize = 200;
-		const float groundY = 0;
+		const int groundSize = 21;
 
-		// A x-z plane at y = g_groundY of dimension [-g_groundSize, g_groundSize]^2
-		const float GrndPos[] =
+		vector<float> vertexData;
+		vector<unsigned short> indexData;
+
+		for (int i = 0; i < groundSize; ++ i)
 		{
-			-groundSize, groundY, -groundSize,
-			-groundSize, groundY,  groundSize,
-			 groundSize, groundY,  groundSize,
-			 groundSize, groundY, -groundSize,
-		};
+			vertexData.push_back((float) i);
+			vertexData.push_back(0);
+			vertexData.push_back(0);
 
-		const float GrndNorm[] =
+			vertexData.push_back((float) i);
+			vertexData.push_back(0);
+			vertexData.push_back((float) groundSize - 1.f);
+
+			indexData.push_back(i*2 + 0);
+			indexData.push_back(i*2 + 1);
+		}
+
+		for (int i = 0; i < groundSize; ++ i)
 		{
-			0, 1, 0,
-			0, 1, 0,
-			0, 1, 0,
-			0, 1, 0,
-			0, 1, 0,
-			0, 1, 0,
-		};
+			vertexData.push_back(0);
+			vertexData.push_back(0);
+			vertexData.push_back((float) i);
 
-		unsigned short idx[] = { 0, 1, 2, 0, 2, 3 };
+			vertexData.push_back((float) groundSize - 1.f);
+			vertexData.push_back(0);
+			vertexData.push_back((float) i);
+
+			indexData.push_back(groundSize*2 + i*2 + 0);
+			indexData.push_back(groundSize*2 + i*2 + 1);
+		}
 
 		CHECKED_GL_CALL(glGenVertexArrays(1, &GroundVertexArray));
 		CHECKED_GL_CALL(glBindVertexArray(GroundVertexArray));
 
-		GLuint GroundPositionBuffer, GroundNormalBuffer, GroundIndexBuffer;
+		GLuint GroundPositionBuffer, GroundIndexBuffer;
 
 		CHECKED_GL_CALL(glGenBuffers(1, &GroundPositionBuffer));
 		CHECKED_GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, GroundPositionBuffer));
-		CHECKED_GL_CALL(glBufferData(GL_ARRAY_BUFFER, sizeof(GrndPos), GrndPos, GL_STATIC_DRAW));
+		CHECKED_GL_CALL(glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertexData.size(), vertexData.data(), GL_STATIC_DRAW));
 		CHECKED_GL_CALL(glEnableVertexAttribArray(0));
 		CHECKED_GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0));
 
-		CHECKED_GL_CALL(glGenBuffers(1, &GroundNormalBuffer));
-		CHECKED_GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, GroundNormalBuffer));
-		CHECKED_GL_CALL(glBufferData(GL_ARRAY_BUFFER, sizeof(GrndNorm), GrndNorm, GL_STATIC_DRAW));
-		CHECKED_GL_CALL(glEnableVertexAttribArray(1));
-		CHECKED_GL_CALL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0));
-
-		GroundIndexCount = 6;
+		GroundIndexCount = (int) indexData.size();
 		CHECKED_GL_CALL(glGenBuffers(1, &GroundIndexBuffer));
 		CHECKED_GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GroundIndexBuffer));
-		CHECKED_GL_CALL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(idx), idx, GL_STATIC_DRAW));
+		CHECKED_GL_CALL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(float) * indexData.size(), indexData.data(), GL_STATIC_DRAW));
 
 		CHECKED_GL_CALL(glBindVertexArray(0));
 	}
@@ -237,7 +241,7 @@ public:
 		CHECKED_GL_CALL(glViewport(0, 0, g_width, g_height));
 
 		// Set background color
-		CHECKED_GL_CALL(glClearColor(0.f, 0.f, 0.f, 1.0f));
+		CHECKED_GL_CALL(glClearColor(0.2f, 0.2f, 0.3f, 1.0f));
 		// Enable z-buffer test
 		CHECKED_GL_CALL(glEnable(GL_DEPTH_TEST));
 
@@ -270,6 +274,20 @@ public:
 		BlinnPhongProg->addUniform("uCameraPos");
 		BlinnPhongProg->addAttribute("vertPos");
 		BlinnPhongProg->addAttribute("vertNor");
+
+		ColorProg = make_shared<Program>();
+		ColorProg->setVerbose(true);
+		ColorProg->setShaderNames(RESOURCE_DIR + "color_vert.glsl", RESOURCE_DIR + "color_frag.glsl");
+		if (! ColorProg->init())
+		{
+			exit(1);
+		}
+
+		ColorProg->addUniform("P");
+		ColorProg->addUniform("V");
+		ColorProg->addUniform("M");
+		ColorProg->addUniform("uColor");
+		ColorProg->addAttribute("vertPos");
 	}
 
 
@@ -329,24 +347,32 @@ public:
 		CHECKED_GL_CALL(glUniform3f(BlinnPhongProg->getUniform("uCameraPos"), cameraPos.x, cameraPos.y, cameraPos.z));
 		CHECKED_GL_CALL(glUniform3f(BlinnPhongProg->getUniform("uLightPos"), g_light.x, g_light.y, g_light.z));
 
-		// draw the dog mesh
-		SetModel(vec3(-1, 0.75f, 0), 0, 1, BlinnPhongProg);
+		// draw the cube mesh
+		SetModel(vec3(-3, 0, -6), 0, 1, BlinnPhongProg);
 		CHECKED_GL_CALL(glUniform3f(BlinnPhongProg->getUniform("uColor"), 0.8f, 0.2f, 0.2f));
 		cube->draw(BlinnPhongProg);
 
 		// draw the sphere mesh
-		SetModel(vec3(1, 0.5f, 0), 0, 1, BlinnPhongProg);
+		SetModel(vec3(3, 0, -6), 0, 1, BlinnPhongProg);
 		CHECKED_GL_CALL(glUniform3f(BlinnPhongProg->getUniform("uColor"), 0.2f, 0.2f, 0.8f));
 		sphere->draw(BlinnPhongProg);
 
+		BlinnPhongProg->unbind();
+
+
+		ColorProg->bind();
+
+		SetProjectionMatrix(ColorProg);
+		SetView(ColorProg);
+
 		// draw the ground plane
-		SetModel(vec3(0, 0, 0), 0, 1, BlinnPhongProg);
-		CHECKED_GL_CALL(glUniform3f(BlinnPhongProg->getUniform("uColor"), 0.8f, 0.8f, 0.8f));
+		SetModel(vec3(-10, 0, -10), 0, 1, ColorProg);
+		CHECKED_GL_CALL(glUniform3f(ColorProg->getUniform("uColor"), 0.8f, 0.8f, 0.8f));
 		CHECKED_GL_CALL(glBindVertexArray(GroundVertexArray));
-		CHECKED_GL_CALL(glDrawElements(GL_TRIANGLES, GroundIndexCount, GL_UNSIGNED_SHORT, 0));
+		CHECKED_GL_CALL(glDrawElements(GL_LINES, GroundIndexCount, GL_UNSIGNED_SHORT, 0));
 		CHECKED_GL_CALL(glBindVertexArray(0));
 
-		BlinnPhongProg->unbind();
+		ColorProg->unbind();
 	}
 
 	void UpdateCamera(float const dT)
