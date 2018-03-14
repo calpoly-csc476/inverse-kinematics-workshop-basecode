@@ -52,6 +52,12 @@ void InverseKinematicsSolver::StepFABRIK(glm::vec3 const & GoalPosition)
 {
 	vec3 RootPosition = Joints[0]->GetInboardLocation();
 
+	for (int t = 0; t < Joints.size(); ++ t)
+	{
+		Joints[t]->InboardLocation = Joints[t]->GetInboardLocation();
+		Joints[t]->OutboardLocation = Joints[t]->GetOutboardLocation();
+	}
+
 	// First pass - front to back
 	FABRIKStepOne(GoalPosition);
 
@@ -68,9 +74,6 @@ void InverseKinematicsSolver::FABRIKStepOne(glm::vec3 const & GoalPosition)
 
 	for (int t = (int) Joints.size() - 1; t >= 0; -- t)
 	{
-		Joints[t]->InboardLocation = Joints[t]->GetInboardLocation();
-		Joints[t]->OutboardLocation = Joints[t]->GetOutboardLocation();
-
 		Joints[t]->OutboardLocation = CurrentGoal;
 		const vec3 CurrentLine = normalize(Joints[t]->OutboardLocation - Joints[t]->InboardLocation);
 
