@@ -67,7 +67,7 @@ public:
 	std::vector<SJoint *> Joints;
 	bool FullReset = false;
 
-	float GetValue(glm::vec3 const & GoalPosition) const;
+	float GetCurrentError(glm::vec3 const & GoalPosition) const;
 
 	void RunIK(glm::vec3 const & GoalPosition);
 

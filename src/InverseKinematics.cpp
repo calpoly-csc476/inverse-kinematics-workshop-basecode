@@ -1,26 +1,22 @@
 
 #include "InverseKinematics.h"
 
+#include <iostream>
 #include <glm/gtx/euler_angles.hpp>
 
-
+using namespace std;
 using namespace glm;
+
 
 float clamp(const float a, const float min, const float max)
 {
 	return (a > max ? max : (a < min ? min : a));
 }
 
-float sq(const float a)
-{
-	return a * a;
-}
-
-
-float InverseKinematicsSolver::GetValue(glm::vec3 const & GoalPosition) const
+float InverseKinematicsSolver::GetCurrentError(glm::vec3 const & GoalPosition) const
 {
 	vec3 const HandLoc = Joints.back()->GetOutboardLocation();
-	return sq(distance(GoalPosition, HandLoc));
+	return distance(GoalPosition, HandLoc);
 }
 
 void InverseKinematicsSolver::RunIK(glm::vec3 const & GoalPosition)
@@ -33,12 +29,23 @@ void InverseKinematicsSolver::RunIK(glm::vec3 const & GoalPosition)
 		}
 	}
 
-	const int MaxSteps = 500;
+	const int MaxSteps = 50;
+	const float ErrorThreshold = 0.001f;
 
 	for (int i = 0; i < MaxSteps; ++ i)
 	{
-		StepFABRIK(GoalPosition);
+		if (GetCurrentError(GoalPosition) < ErrorThreshold)
+		{
+			cout << "Found IK solution in " << i << " iterations." << endl;
+			return;
+		}
+		else
+		{
+			StepFABRIK(GoalPosition);
+		}
 	}
+
+	cout << "Exited IK attempt after " << MaxSteps << " iterations." << endl;
 }
 
 void InverseKinematicsSolver::StepFABRIK(glm::vec3 const & GoalPosition)

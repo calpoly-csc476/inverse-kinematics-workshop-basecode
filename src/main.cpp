@@ -66,7 +66,7 @@ public:
 	GLuint GroundVertexArray;
 	int GroundIndexCount;
 
-	vec3 g_light = vec3(2, 6, 4);
+	vec3 g_light = vec3(-2, 6, -4);
 
 	InverseKinematicsSolver Solver;
 	vec3 ik_goal = vec3(1, 0, 1);
@@ -167,7 +167,14 @@ public:
 			case GLFW_KEY_5:
 				cameraMoveSpeed = 24.f;
 				break;
+			}
+		}
 
+
+		if (action == GLFW_PRESS || action == GLFW_REPEAT)
+		{
+			switch (key)
+			{
 				// Move end effector goal
 			case GLFW_KEY_I:
 				ik_goal.z += OffsetSpeed;
