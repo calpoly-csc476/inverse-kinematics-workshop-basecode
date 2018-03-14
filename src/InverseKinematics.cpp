@@ -70,36 +70,32 @@ void InverseKinematicsSolver::StepFABRIK(glm::vec3 const & GoalPosition)
 
 void InverseKinematicsSolver::FABRIKStepOne(glm::vec3 const & GoalPosition)
 {
-	vec3 CurrentGoal = GoalPosition;
-
-	for (int t = (int) Joints.size() - 1; t >= 0; -- t)
-	{
-		Joints[t]->OutboardLocation = CurrentGoal;
-		const vec3 CurrentLine = normalize(Joints[t]->OutboardLocation - Joints[t]->InboardLocation);
-
-		Joints[t]->InboardLocation = Joints[t]->OutboardLocation - CurrentLine * Joints[t]->Length;
-		CurrentGoal = Joints[t]->InboardLocation;
-	}
-
+	//  _____    ___      ____     ___  
+	// |_   _|  / _ \    |  _ \   / _ \ 
+	//   | |   | | | |   | | | | | | | |
+	//   | |   | |_| |   | |_| | | |_| |
+	//   |_|    \___/    |____/   \___/ 
+	//
 }
 
 void InverseKinematicsSolver::FABRIKStepTwo(glm::vec3 const & GoalPosition)
 {
-	vec3 CurrentGoal = GoalPosition;
-
-	for (int t = 0; t < Joints.size(); ++ t)
-	{
-		Joints[t]->InboardLocation = CurrentGoal;
-		const vec3 CurrentLine = normalize(Joints[t]->InboardLocation - Joints[t]->OutboardLocation);
-
-		Joints[t]->OutboardLocation = Joints[t]->InboardLocation - CurrentLine * Joints[t]->Length;
-		CurrentGoal = Joints[t]->OutboardLocation;
-	}
+	//  _____    ___      ____     ___  
+	// |_   _|  / _ \    |  _ \   / _ \ 
+	//   | |   | | | |   | | | | | | | |
+	//   | |   | |_| |   | |_| | | |_| |
+	//   |_|    \___/    |____/   \___/ 
+	//
 }
 
 void InverseKinematicsSolver::ConvertPositionsToEulerAngles()
 {
-	// Convert inboard/outboard to direction vectors
+	// FABRIK calculates positions for each joint inboard/outboard, but we may want to have joints rotations
+	// at the end for rendering. This code will compute Euler angles from the rotations, it may likely be
+	// better for whatever application to use quaternions or matrices.
+	//
+	// This code does not need to be touched.
+
 	mat4 CurrentTransform = mat4(1.f);
 
 	for (int t = 0; t < Joints.size(); ++ t)
@@ -109,15 +105,19 @@ void InverseKinematicsSolver::ConvertPositionsToEulerAngles()
 		// Transform into local (joint) space
 		Direction = vec3(inverse(CurrentTransform) * vec4(Direction, 0.f));
 
+		// Compute angle and axis
 		const vec3 Axis = cross(vec3(1, 0, 0), Direction);
 		const float Angle = acos(clamp(dot(Direction, vec3(1, 0, 0)), -1.f, 1.f)); // Clamp for numerical imprecision reasons
 
 		if (length(Axis) < 0.0001f)
 		{
+			// Axis is small - means either 0 rotation or 180 rotation.
+			// Axis of rotation does not matter, so let's just rotate around the up-vector
 			Joints[t]->Rotation = vec3(0, Angle, 0);
 		}
 		else
 		{
+			// Make a rotation matrix, then use glm's built-in euler angle extraction!
 			mat4 rotation = rotate(mat4(1.f), Angle, Axis);
 			vec3 euler;
 			extractEulerAngleXYZ(rotation, euler.x, euler.y, euler.z);
