@@ -32,26 +32,19 @@ public:
 
 		glm::mat4 GetInboardTransformation() const
 		{
-			//  _____    ___      ____     ___  
-			// |_   _|  / _ \    |  _ \   / _ \ 
-			//   | |   | | | |   | | | | | | | |
-			//   | |   | |_| |   | |_| | | |_| |
-			//   |_|    \___/    |____/   \___/ 
-			//
-
-			return glm::mat4(1.f);
+			if (Parent)
+			{
+				return Parent->GetOutboardTransformation() * GetLocalRotation();
+			}
+			else
+			{
+				return GetLocalRotation();
+			}
 		}
 
 		glm::mat4 GetOutboardTransformation() const
 		{
-			//  _____    ___      ____     ___  
-			// |_   _|  / _ \    |  _ \   / _ \ 
-			//   | |   | | | |   | | | | | | | |
-			//   | |   | |_| |   | |_| | | |_| |
-			//   |_|    \___/    |____/   \___/ 
-			//
-
-			return glm::mat4(1.f);
+			return GetInboardTransformation() * glm::translate(glm::mat4(1.f), glm::vec3(Length, 0, 0));
 		}
 
 		glm::vec3 GetOutboardLocation() const
