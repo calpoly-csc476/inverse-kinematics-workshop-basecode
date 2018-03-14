@@ -236,7 +236,7 @@ public:
 
 	void UpdateGoalPosition()
 	{
-		//Solver.RunIK(ik_goal);
+		Solver.RunIK(ik_goal);
 	}
 
 
@@ -493,7 +493,7 @@ public:
 				glm::translate(glm::mat4(1.f), vec3(Solver.Joints[i]->Length / 2.f, 0, 0)) * 
 				glm::scale(glm::mat4(1.f), glm::vec3(Solver.Joints[i]->Length / 2.f, 0.03f, 0.03f)),
 				BlinnPhongProg);
-			//cube->draw(BlinnPhongProg);
+			cube->draw(BlinnPhongProg);
 		}
 
 		BlinnPhongProg->unbind();
